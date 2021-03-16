@@ -6,15 +6,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
     @Autowired
     private final UserRepository userRepository;
 
-    public MyUserDetailsService(UserRepository userRepository){
+    @Autowired
+    private final AuthGroupRepository authGroupRepository;
+
+    public MyUserDetailsService(UserRepository userRepository, AuthGroupRepository authGroupRepository) {
         super();
         this.userRepository = userRepository;
+        this.authGroupRepository = authGroupRepository;
     }
 
     @Override
@@ -23,7 +29,9 @@ public class MyUserDetailsService implements UserDetailsService {
         if(null==user){
             throw new UsernameNotFoundException("cannot find username: " + username);
         }
-        return new LandonUserPrincipal(user);
+        List<AuthGroup> authGroups = this.authGroupRepository.findByUsername(username);
+        return new LandonUserPrincipal(user, authGroups);
+
     }
 
 }
